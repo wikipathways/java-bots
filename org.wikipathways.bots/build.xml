@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<project name="WikiPathways Java Bots" default="jar" basedir=".">
+	<property name="src.dir" value="src"/>
+	<property name="debug.mode" value="true"/>
+
+	<property name="version" value="3.2.0"/>
+	
+	<property name="jar.name" value="org.wikipathways.bots-${version}.jar"/>
+	<property name="build.dir" value="build"/>
+	
+	<property name="ant.build.javac.source" value="1.6"/>
+	<property name="ant.build.javac.target" value="1.6"/>
+	
+	<target name="prepare">
+		<delete dir="${build.dir}"/>
+		<mkdir dir="${build.dir}"/>
+	</target>
+
+	<path id="project.class.path">
+	  <fileset dir="lib">
+		<include name="*.jar"/>
+	  </fileset>
+	</path>
+
+	<target name="clean" description="Remove all intermediate files.">
+		<delete dir="${build.dir}"/>
+		<delete file="${jar.name}"/>
+	</target>
+
+	<target name="compile" depends="prepare">
+		<echo>Compiling: wp java bots</echo>
+		<javac srcdir="src"
+			   includes="**"
+			   destdir="${build.dir}"
+			   debug="${debug.mode}">
+		  <classpath refid="project.class.path"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile"> 
+		<unjar src="lib/derby.jar" dest="${build.dir}"/>
+		<unjar src="lib/org.bridgedb.rdb.construct.jar" dest="${build.dir}"/>
+		<unjar src="lib/org.bridgedb.rdb.jar" dest="${build.dir}"/>
+		<unjar src="lib/org.wikipathways.client.lib.jar" dest="${build.dir}"/>
+
+		<echo>Creating JAR: ${jar.name}</echo>
+		<jar jarfile="${jar.name}" basedir="${build.dir}"/>
+	</target>
+</project>
