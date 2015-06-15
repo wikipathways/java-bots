@@ -16,7 +16,9 @@
 //
 package org.wikipathways.bots;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -62,7 +64,7 @@ public abstract class Bot {
 			if(cacheStr == null) {
 				throw new BotException("Property cache-path is missing");
 			}
-			cache = new WikiPathwaysCache(client, new File(cacheStr));
+			cache = new WikiPathwaysCache(new File(cacheStr));
 
 			//Login if possible
 			user = props.getProperty(PROP_USER);
@@ -82,7 +84,7 @@ public abstract class Bot {
 
 	public Collection<Result> scan() throws BotException {
 		try {
-			getCache().update(null);
+			getCache().update();
 		} catch(Exception e) {
 			throw new BotException(e);
 		}
@@ -237,6 +239,12 @@ public abstract class Bot {
 		public BotException(String message) {
 			super(message);
 		}
+	}
+	
+	public static void writeLogMessage(File logFile, String message) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true));
+		writer.write(message + "\n");
+		writer.close();
 	}
 
 	public static void runAll(Bot bot, File htmlReport, File txtReport) throws BotException, IOException {
