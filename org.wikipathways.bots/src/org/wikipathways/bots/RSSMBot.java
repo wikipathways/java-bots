@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.util.Collection;
 import java.util.Properties;
 
+import org.bridgedb.bio.DataSourceTxt;
 import org.bridgedb.rdb.GdbProvider;
 import org.jdom.Document;
 import org.jdom.output.Format;
@@ -24,6 +25,7 @@ public class RSSMBot extends Bot {
 		
 		File gdbFile = new File(props.getProperty(PROP_GDBS));
 		try {
+			DataSourceTxt.init();
 			gdbs = GdbProvider.fromConfigFile(gdbFile);
 		} catch (Exception e) {
 			throw new BotException(e);

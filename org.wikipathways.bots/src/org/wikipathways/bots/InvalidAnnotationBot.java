@@ -29,7 +29,7 @@ import java.util.Properties;
 import org.bridgedb.IDMapperException;
 import org.bridgedb.IDMapperStack;
 import org.bridgedb.Xref;
-import org.bridgedb.bio.BioDataSource;
+import org.bridgedb.bio.DataSourceTxt;
 import org.bridgedb.bio.Organism;
 import org.bridgedb.rdb.GdbProvider;
 import org.pathvisio.core.debug.Logger;
@@ -56,11 +56,11 @@ public class InvalidAnnotationBot extends Bot {
 		super(props);
 		String thr = props.getProperty(PROP_THRESHOLD);
 		if(thr != null) threshold = Double.parseDouble(thr);
-
+		
 		File gdbFile = new File(props.getProperty(PROP_GDBS));
 		try {
+			DataSourceTxt.init();
 			gdbs = GdbProvider.fromConfigFile(gdbFile);
-			BioDataSource.init();
 		} catch (Exception e) {
 			throw new BotException(e);
 		}

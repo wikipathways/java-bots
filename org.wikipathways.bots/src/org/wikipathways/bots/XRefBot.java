@@ -29,6 +29,7 @@ import java.util.Properties;
 import org.bridgedb.IDMapper;
 import org.bridgedb.IDMapperException;
 import org.bridgedb.Xref;
+import org.bridgedb.bio.DataSourceTxt;
 import org.bridgedb.bio.Organism;
 import org.bridgedb.rdb.GdbProvider;
 import org.pathvisio.core.debug.Logger;
@@ -56,6 +57,7 @@ public class XRefBot extends Bot {
 
 		File gdbFile = new File(props.getProperty(PROP_GDBS));
 		try {
+			DataSourceTxt.init();
 			gdbs = GdbProvider.fromConfigFile(gdbFile);
 		} catch (Exception e) {
 			throw new BotException(e);
