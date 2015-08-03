@@ -1,6 +1,6 @@
 // PathVisio,
 // a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2011 BiGCaT Bioinformatics
+// Copyright 2006-2015 BiGCaT Bioinformatics
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import org.bridgedb.IDMapper;
 import org.bridgedb.IDMapperException;
+import org.bridgedb.IDMapperStack;
 import org.bridgedb.Xref;
 import org.bridgedb.bio.DataSourceTxt;
 import org.bridgedb.bio.Organism;
@@ -105,7 +106,8 @@ public class XRefBot extends Bot {
 				if(pwe.getObjectType() == ObjectType.DATANODE) {
 					boolean exists = false;
 					Xref xref = pwe.getXref();
-					for(IDMapper gdb : gdbs.getGdbs(org)) {
+					IDMapperStack stack = gdbs.getStack(org);
+					for(IDMapper gdb : stack.getMappers()) {
 						try {
 							if(xref.getId() != null && xref.getDataSource() != null && gdb.xrefExists(xref)) {
 								exists = true;
@@ -150,10 +152,6 @@ public class XRefBot extends Bot {
 
 		public double getPercentValid() {
 			return (double)(100 * getNrValid()) / getNrXrefs();
-		}
-
-		public double getPercentInvalid() {
-			return (double)(100 * getNrInvalid()) / getNrXrefs();
 		}
 
 		public int getNrInvalid() {

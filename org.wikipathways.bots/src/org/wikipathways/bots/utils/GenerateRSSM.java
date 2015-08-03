@@ -1,4 +1,21 @@
+// WikiPathways,
+// Java bots to generate RSSM file
+// Copyright 2014-2015 BiGCaT Bioinformatics
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 package org.wikipathways.bots.utils;
+
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -48,8 +65,8 @@ public class GenerateRSSM {
 	private String sourceUrl;
 	private GdbProvider idmp;
 	
-	private DataSource GENE_DS = DataSource.getBySystemCode("L");
-	private DataSource MET_DS = DataSource.getBySystemCode("Cpc");
+	private DataSource GENE_DS = DataSource.getExistingBySystemCode("L");
+	private DataSource MET_DS = DataSource.getExistingBySystemCode("Cpc");
 	
 	public static final String COMMENT_DESCRIPTION = "WikiPathways-description";
 	public static final String COMMENT_CATEGORY = "WikiPathways-category";
@@ -244,7 +261,7 @@ public class GenerateRSSM {
 	private void addLinkedSystems(Element biosystem, Pathway p) {
 		Set<Xref> linkIds = new HashSet<Xref>();
 		for(Xref x : p.getDataNodeXrefs()) {
-			if(DataSource.getBySystemCode("Wp").equals(x.getDataSource())) {
+			if(DataSource.getExistingBySystemCode("Wp").equals(x.getDataSource())) {
 				linkIds.add(x);
 			}
 		}
