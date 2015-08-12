@@ -50,8 +50,8 @@ import org.wikipathways.client.WikiPathwaysClient;
 
 
 public class OutdatedIdsReport {
-	static Map<String, ArrayList<OutdatedResult>> mapPw;
-	static Map<String, ArrayList<OutdatedResult>> mapRef;
+	static Map<String, HashSet<OutdatedResult>> mapPw;
+	static Map<String, HashSet<OutdatedResult>> mapRef;
 	static String species;
 	
 	public static void main(String[] args)
@@ -77,11 +77,12 @@ public class OutdatedIdsReport {
 		FileOutputStream str = new FileOutputStream (new File (args[4]));
 		
 		int count = 0;
+		int cpt = 0;
 		HashSet<String> setXref = new HashSet<String>();
 		
 		species = Organism.fromCode(args[2]).latinName();
-		mapPw  =  new HashMap<String, ArrayList<OutdatedResult>>();
-		mapRef =  new HashMap<String, ArrayList<OutdatedResult>>();
+		mapPw  =  new HashMap<String, HashSet<OutdatedResult>>();
+		mapRef =  new HashMap<String, HashSet<OutdatedResult>>();
 		
 		for(WSPathwayInfo pathwayInfo : pathwayList) {
 
@@ -99,40 +100,41 @@ public class OutdatedIdsReport {
 						String refLabel = pwElm.getTextLabel().trim();
 						String refID = pwElm.getXref().toString().trim();
 
-						setXref.add(pwElm.getXref().getId());
-						count++;
-						
-						fileWriter.write(pwID+ "\t"+ 
-								pwName + "\t" + 
-								refLabel + "\t" +  
-								refID +"\n");
-
-
-						ArrayList<OutdatedResult> pwList = mapPw.get(pwID);
+						if (setXref.add(pwElm.getXref().getId())){
+							fileWriter.write(pwID+ "\t"+ 
+									pwName + "\t" + 
+									refLabel + "\t" +  
+									refID +"\n");
+							count++;
+						}
+						HashSet<OutdatedResult> pwList = mapPw.get(pwID);
 
 						if (pwList==null){
-							ArrayList<OutdatedResult> list = new ArrayList<OutdatedResult>();
+							HashSet<OutdatedResult> list = new HashSet<OutdatedResult>();
 							list.add(new OutdatedResult(pwID, pwName, refLabel, refID));
 							mapPw.put(pwID, list);
 						}
 						else{
 							pwList.add(new OutdatedResult(pwID, pwName, refLabel, refID));
+							cpt++;
 						}	
-						ArrayList<OutdatedResult> xrefList = mapRef.get(refID);
+						HashSet<OutdatedResult> xrefList = mapRef.get(refID);
 
 						if (xrefList==null){
-							ArrayList<OutdatedResult> list = new ArrayList<OutdatedResult>();							
+							HashSet<OutdatedResult> list = new HashSet<OutdatedResult>();							
 							list.add(new OutdatedResult(pwID, pwName, refLabel, refID));
 							mapRef.put(refID, list);
 						}
 						else{
 							xrefList.add(new OutdatedResult(pwID, pwName, refLabel, refID));
+							cpt++;
 						}	
 					}	
 				}
 			}			
 		}
 		System.out.println(count);
+		System.out.println(cpt);
 		System.out.println("Set: "+setXref.size());
 		fileWriter.flush();
 		fileWriter.close();
@@ -152,7 +154,7 @@ public class OutdatedIdsReport {
 
 		out.add(Html.h1("WikiPathways - " +species + " - outdated ids for Ensembl v80"));
 		out.add(Html.p(
-				"For more information on how these errors are dealt with, ask Tina not Jonathan"));
+				"For more information on how these errors are dealt with, ask Tina not Jonathan."));
 
 		out.add (Html.p(mapRef.size()+" unique ids outdated in "+mapPw.size()+" pathways."));
 
@@ -173,39 +175,39 @@ public class OutdatedIdsReport {
 		out.end("body");
 		out.end("html");
 	}
-	private static Html asList(Map<String, ArrayList<OutdatedResult>> map, boolean type)
+	private static Html asList(Map<String, HashSet<OutdatedResult>> map, boolean type)
 			throws IOException{
 		Html list = Html.ul(); // coarse list
 
-		List<Map.Entry<String, ArrayList<OutdatedResult>>> keys =
-				new LinkedList<Map.Entry<String, ArrayList<OutdatedResult>>>( map.entrySet());
+		List<Map.Entry<String, HashSet<OutdatedResult>>> keys =
+				new LinkedList<Map.Entry<String, HashSet<OutdatedResult>>>( map.entrySet());
 
-		Collections.sort( keys, new Comparator<Map.Entry<String, ArrayList<OutdatedResult>>>(){
-			public int compare( Map.Entry<String, ArrayList<OutdatedResult>> o1,
-								Map.Entry<String, ArrayList<OutdatedResult>> o2 )
+		Collections.sort( keys, new Comparator<Map.Entry<String, HashSet<OutdatedResult>>>(){
+			public int compare( Map.Entry<String, HashSet<OutdatedResult>> o1,
+								Map.Entry<String, HashSet<OutdatedResult>> o2 )
 			{
 				return Integer.compare(o2.getValue().size(),o1.getValue().size());
 			}
 		} );
 	      
-		for (Entry<String, ArrayList<OutdatedResult>> entry : keys){
+		for (Entry<String, HashSet<OutdatedResult>> entry : keys){
 			Html contents = Html.ul(); // fine list
 			String italic = null;
 			String title = null;
 			for (OutdatedResult result : entry.getValue()){
-				if (type){	
-					if (entry.getKey().equals(result.getPwID())) 
-						italic=result.getPwName();
+				if (type){					
 					contents.addChild(Html.li(
 							result.getRefLabel() + ": ", Html.i(result.getRefID())));
 				}
-				else{					
+				else{
+					if (entry.getKey().equals(result.getRefID())) 
+						italic=result.getPwName();
 					contents.addChild(
 							Html.li(
 									Html.a(result.getPwID()).
 									href("http://wikipathways.org/index.php/Pathway:"+entry.getKey())
 									+" (",
-							Html.i(result.getPwName()) + ") - ",
+							Html.i(italic) + ") - ",
 							Html.i(result.getRefLabel()) ));
 				}
 			}			
