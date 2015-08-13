@@ -76,7 +76,6 @@ public class OutdatedIdsReport {
 		FileOutputStream str = new FileOutputStream (new File (args[4]));
 		
 		int count = 0;
-		int cpt = 0;
 		HashSet<String> setXref = new HashSet<String>();
 		
 		species = Organism.fromCode(args[2]).latinName();
@@ -115,7 +114,6 @@ public class OutdatedIdsReport {
 						}
 						else{
 							pwList.add(new OutdatedResult(pwID, pwName, refLabel, refID));
-							cpt++;
 						}	
 						HashSet<OutdatedResult> xrefList = mapRef.get(refID);
 
@@ -126,14 +124,12 @@ public class OutdatedIdsReport {
 						}
 						else{
 							xrefList.add(new OutdatedResult(pwID, pwName, refLabel, refID));
-							cpt++;
 						}	
 					}	
 				}
 			}			
 		}
 		System.out.println(count);
-		System.out.println(cpt);
 		System.out.println("Set: "+setXref.size());
 		fileWriter.flush();
 		fileWriter.close();
@@ -176,7 +172,7 @@ public class OutdatedIdsReport {
 	}
 	private static Html asList(Map<String, HashSet<OutdatedResult>> map, boolean type)
 			throws IOException{
-		Html list = Html.ul(); // coarse list
+		Html list = Html.ul();
 
 		List<Map.Entry<String, HashSet<OutdatedResult>>> keys =
 				new LinkedList<Map.Entry<String, HashSet<OutdatedResult>>>( map.entrySet());
@@ -190,32 +186,33 @@ public class OutdatedIdsReport {
 		} );
 	      
 		for (Entry<String, HashSet<OutdatedResult>> entry : keys){
-			Html contents = Html.ul(); // fine list
+			Html contents = Html.ul();
 			String italic = null;
 			String title = null;
 			for (OutdatedResult result : entry.getValue()){
-				if (type){					
+				if (type){
+					if (entry.getKey().equals(result.getPwID())) 
+						italic=result.getPwName();
 					contents.addChild(Html.li(
 							result.getRefLabel() + ": ", Html.i(result.getRefID())));
 				}
 				else{
 					if (entry.getKey().equals(result.getRefID())) 
 						italic=result.getPwName();
+					String href = "<a href='http://wikipathways.org/index.php/Pathway:"+result.getPwID()
+							+ "' target='_null'>"+result.getPwID()+"</a>";
 					contents.addChild(
-							Html.li(
-									Html.a(result.getPwID()).
-									href("http://wikipathways.org/index.php/Pathway:"+entry.getKey())
-									+" (",
+							Html.li(href+" (",
 							Html.i(italic) + ") - ",
 							Html.i(result.getRefLabel()) ));
 				}
-			}			
-			Html id = Html.a(entry.getKey()).
-					href("http://wikipathways.org/index.php/Pathway:"+entry.getKey());
+			}
 			if (type){
+				String href = "<a href='http://wikipathways.org/index.php/Pathway:"+entry.getKey()
+						+ "' target='_null'>"+entry.getKey()+"</a>";
 				title = " - " +species + " - " + entry.getValue().size()+ " identifier(s) outdated";
 				list.addChild (Html.li (
-						Html.b(id),title, Html.br(),
+						Html.b(href),title, Html.br(),
 						Html.i(italic), Html.br(),
 						Html.collapseDiv ("Ref details...", contents)
 						));				
