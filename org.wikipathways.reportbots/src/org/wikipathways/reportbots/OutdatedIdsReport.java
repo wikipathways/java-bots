@@ -57,9 +57,7 @@ public class OutdatedIdsReport {
 			throws ClassNotFoundException, IDMapperException, ConverterException, IOException {
 		
 		URL wsURL = new URL("http://webservice.wikipathways.org");
-		WikiPathwaysClient client = new WikiPathwaysClient(wsURL);
-
-		
+		WikiPathwaysClient client = new WikiPathwaysClient(wsURL);	
 
 		Class.forName("org.bridgedb.rdb.IDMapperRdb");
 		DataSourceTxt.init();
