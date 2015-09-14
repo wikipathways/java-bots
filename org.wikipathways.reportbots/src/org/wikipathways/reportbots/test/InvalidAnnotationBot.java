@@ -142,7 +142,6 @@ public class InvalidAnnotationBot extends Bot {
 	protected Result scanPathway(File pathwayFile) throws BotException {
 		try {
 			XRefResult report = new XRefResult(getCache().getPathwayInfo(pathwayFile));
-//			XRefResult report = new XRefResult(getClient().getPathwayInfo("WP2152"));
 			Pathway pathway = new Pathway();
 			pathway.readFromXml(pathwayFile, true);
 			
@@ -167,7 +166,6 @@ public class InvalidAnnotationBot extends Bot {
 					report.addXref(pwe, valid);
 				}
 			}
-
 			return report;
 		} catch(Exception e) {
 			throw new BotException(e);
@@ -275,12 +273,6 @@ public class InvalidAnnotationBot extends Bot {
 			
 			Logger.log.trace("Running bot " + bot);
 			Collection<Result> results = bot.scan();
-			
-//			File file = new File("/home/bigcat-jonathan/WP2152_77496.gpml");
-//			Logger.log.trace("Running bot " + bot);		
-//			List<Result> reports = new ArrayList<Result>();
-//			reports.add(bot.scanPathway(file));
-//			Collection<Result> results = reports;
 
 			Logger.log.trace("Generating report");
 			BotReport report = bot.createReport(results);

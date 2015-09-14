@@ -21,7 +21,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -30,14 +32,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import nl.helixsoft.xml.Html;
 import nl.helixsoft.xml.HtmlStream;
 
 import org.bridgedb.BridgeDb;
+import org.bridgedb.DataSource;
 import org.bridgedb.IDMapper;
 import org.bridgedb.IDMapperException;
+import org.bridgedb.Xref;
 import org.bridgedb.bio.DataSourceTxt;
 import org.bridgedb.bio.Organism;
 import org.pathvisio.core.model.ConverterException;
@@ -52,6 +57,8 @@ public class OutdatedIdsReport {
 	static Map<String, HashSet<OutdatedResult>> mapPw;
 	static Map<String, HashSet<OutdatedResult>> mapRef;
 	static String species;
+	static IDMapper mapperOld;
+	static DataSource dsEn;
 	
 	public static void main(String[] args)
 			throws ClassNotFoundException, IDMapperException, ConverterException, IOException {
@@ -61,12 +68,15 @@ public class OutdatedIdsReport {
 
 		Class.forName("org.bridgedb.rdb.IDMapperRdb");
 		DataSourceTxt.init();
+		dsEn = DataSource.getExistingBySystemCode("En");
 		IDMapper mapperNew = BridgeDb.
 				connect("idmapper-pgdb:"+args[0]);
-		IDMapper mapperOld = BridgeDb.
+		mapperOld = BridgeDb.
 				connect("idmapper-pgdb:"+args[1]);
-
-		WSPathwayInfo[] pathwayList = client.listPathways(Organism.fromCode(args[2]));
+		
+		species = args[0].substring(args[0].lastIndexOf("/")+1, args[0].lastIndexOf("/")+3);
+		
+		WSPathwayInfo[] pathwayList = client.listPathways(Organism.fromCode(species));
 
 		File file = new File(args[3]);
 		FileWriter fileWriter = new FileWriter(file);
@@ -76,7 +86,94 @@ public class OutdatedIdsReport {
 		int count = 0;
 		HashSet<String> setXref = new HashSet<String>();
 		
-		species = Organism.fromCode(args[2]).latinName();
+		species = Organism.fromCode(species).latinName();
+		
+		mapPw  =  new HashMap<String, HashSet<OutdatedResult>>();
+		mapRef =  new HashMap<String, HashSet<OutdatedResult>>();
+		
+		for(WSPathwayInfo pathwayInfo : pathwayList) {
+
+			WSPathway wsPathway = client.getPathway(pathwayInfo.getId());
+			Pathway pathway = WikiPathwaysClient.toPathway(wsPathway);
+
+			for(PathwayElement pwElm : pathway.getDataObjects()) {
+				if(pwElm.getDataNodeType().equals("GeneProduct")) {
+					if (!mapperNew.xrefExists(pwElm.getXref()) 
+						&& pwElm.getXref().getDataSource()!=null 
+						&& mapperOld.xrefExists(pwElm.getXref()) ){
+
+						String pwID = pathwayInfo.getId();
+						String pwName = pathwayInfo.getName();
+						String refLabel = pwElm.getTextLabel().trim();
+						String refID = pwElm.getXref().toString().trim();
+
+						if (setXref.add(pwElm.getXref().getId())){
+							fileWriter.write(pwID+ "\t"+ 
+									pwName + "\t" + 
+									refLabel + "\t" +  
+									refID +"\n");
+							count++;
+						}
+						HashSet<OutdatedResult> pwList = mapPw.get(pwID);
+
+						if (pwList==null){
+							HashSet<OutdatedResult> list = new HashSet<OutdatedResult>();
+							list.add(new OutdatedResult(pwID, pwName, refLabel, refID));
+							mapPw.put(pwID, list);
+						}
+						else{
+							pwList.add(new OutdatedResult(pwID, pwName, refLabel, refID));
+						}	
+						HashSet<OutdatedResult> xrefList = mapRef.get(refID);
+
+						if (xrefList==null){
+							HashSet<OutdatedResult> list = new HashSet<OutdatedResult>();							
+							list.add(new OutdatedResult(pwID, pwName, refLabel, refID));
+							mapRef.put(refID, list);
+						}
+						else{
+							xrefList.add(new OutdatedResult(pwID, pwName, refLabel, refID));
+						}	
+					}	
+				}
+			}			
+		}
+		System.out.println(count);
+		System.out.println("Set: "+setXref.size());
+		fileWriter.flush();
+		fileWriter.close();
+				
+		printHtmlOverview(new PrintStream(str));
+	}
+	
+	public static void run(String pathOld, String pathNew, String pathReport) 
+			throws ClassNotFoundException, IDMapperException,  IOException, ConverterException {
+
+		URL wsURL = new URL("http://webservice.wikipathways.org");
+		WikiPathwaysClient client = new WikiPathwaysClient(wsURL);	
+
+		Class.forName("org.bridgedb.rdb.IDMapperRdb");
+		DataSourceTxt.init();
+		dsEn = DataSource.getExistingBySystemCode("En");
+		IDMapper mapperNew = BridgeDb.
+				connect("idmapper-pgdb:"+pathNew);
+		mapperOld = BridgeDb.
+				connect("idmapper-pgdb:"+pathOld);
+		
+		species = pathOld.substring(pathOld.lastIndexOf("/")+1, pathOld.lastIndexOf("/")+3);
+		
+		WSPathwayInfo[] pathwayList = client.listPathways(Organism.fromCode(species));
+
+		File file = new File(pathReport+".txt");
+		FileWriter fileWriter = new FileWriter(file);
+		
+		FileOutputStream str = new FileOutputStream (new File (pathReport+".html"));
+		
+		int count = 0;
+		HashSet<String> setXref = new HashSet<String>();
+		
+		species = Organism.fromCode(species).latinName();
+		
 		mapPw  =  new HashMap<String, HashSet<OutdatedResult>>();
 		mapRef =  new HashMap<String, HashSet<OutdatedResult>>();
 		
@@ -135,7 +232,7 @@ public class OutdatedIdsReport {
 		printHtmlOverview(new PrintStream(str));
 	}
 
-	public static void printHtmlOverview(PrintStream stream) throws IOException
+	public static void printHtmlOverview(PrintStream stream) throws IOException, IDMapperException
 	{
 		HtmlStream out = new HtmlStream(stream);
 		out.begin ("html");
@@ -169,7 +266,7 @@ public class OutdatedIdsReport {
 		out.end("html");
 	}
 	private static Html asList(Map<String, HashSet<OutdatedResult>> map, boolean type)
-			throws IOException{
+			throws IOException, IDMapperException{
 		Html list = Html.ul();
 
 		List<Map.Entry<String, HashSet<OutdatedResult>>> keys =
@@ -216,7 +313,14 @@ public class OutdatedIdsReport {
 						));				
 			}
 			else{
-				title = " - outdated in "+ entry.getValue().size()+ " pathways";
+				Set<Xref> ensRef = new HashSet<Xref> ();
+				if (!entry.getKey().contains("En")){
+					String id = entry.getKey().substring(3, entry.getKey().length());
+					DataSource ds = DataSource.getExistingBySystemCode(entry.getKey().substring(0, entry.getKey().indexOf(":")));
+					Xref ref = new Xref(id,ds);
+					ensRef = mapperOld.mapID(ref, dsEn);
+				}
+				title = " "+ensRef+" - outdated in "+ entry.getValue().size()+ " pathways";
 				list.addChild (Html.li (
 						Html.b(entry.getKey()),title, Html.br(),						
 						Html.collapseDiv ("Pathways details...", contents)
