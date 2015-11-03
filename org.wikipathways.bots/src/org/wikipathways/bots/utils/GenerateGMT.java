@@ -20,7 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.bridgedb.DataSource;
@@ -57,8 +59,9 @@ public class GenerateGMT {
 		this.client = client;
 	}
 	
-	public String createGMTFile(Collection<File> pathwayFiles) throws ConverterException, IDMapperException, RemoteException {
-		String output = "";
+	public Map<String,String> createGMTFile(Collection<File> pathwayFiles, String date, String syscode) throws ConverterException, IDMapperException, RemoteException {
+		
+		Map<String, String> output = new HashMap<String, String>();
 		
 		Set<String> includeIds = new HashSet<String>();
 		for(String tag : includeTags) {
@@ -66,6 +69,8 @@ public class GenerateGMT {
 				includeIds.add(t.getPathway().getId());
 			}
 		}
+		
+		System.out.println(includeIds.size());
 		
 		int count = 1;
 		int size = includeIds.size();
@@ -80,17 +85,23 @@ public class GenerateGMT {
 				
 				Set<String> ids = new HashSet<String>();
 				for(Xref x : p.getDataNodeXrefs()) {
-					Set<Xref> res = stack.mapID(x, DataSource.getExistingBySystemCode("L"));
+					Set<Xref> res = stack.mapID(x, DataSource.getExistingBySystemCode(syscode));
 					for(Xref xref : res) {
 						ids.add(xref.getId());
 					}
 				}
 				if(ids.size() > 0) {
-					output = output + p.getMappInfo().getMapInfoName() + "("  + p.getMappInfo().getOrganism() + ")" + "\thttp://wikipathways.org/instance/" + id;
-					for(String s : ids) {
-						output = output + "\t" + s;	
+					String org = p.getMappInfo().getOrganism();
+					if(!output.containsKey(org)) {
+						output.put(org, "");
 					}
-					output = output + "\n";
+					String buffer = output.get(org);
+					buffer = buffer + p.getMappInfo().getMapInfoName() + "%" + "WikiPathways_" + date + "%" + id + "\t" + "http://www.wikipathways.org/instance/" + id;
+					for(String s : ids) {
+						buffer = buffer + "\t" + s;	
+					}
+					buffer = buffer + "\n";
+					output.put(org, buffer);
 				}
 				count++;
 			}

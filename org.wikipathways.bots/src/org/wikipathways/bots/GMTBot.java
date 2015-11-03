@@ -19,7 +19,10 @@ package org.wikipathways.bots;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 
 import org.bridgedb.bio.DataSourceTxt;
@@ -43,6 +46,7 @@ public class GMTBot extends Bot {
 		super(props);
 		
 		File gdbFile = new File(props.getProperty(PROP_GDBS));
+		System.out.println(gdbFile.exists());
 		try {
 			DataSourceTxt.init();
 			gdbs = GdbProvider.fromConfigFile(gdbFile);
@@ -83,15 +87,34 @@ public class GMTBot extends Bot {
 			Properties props = new Properties();
 			props.load(new FileInputStream(new File(args[0])));
 			GMTBot bot =  new GMTBot(props);
+			bot.getCache().update();
 
 			File output = new File(args[1]);
 			
 			GenerateGMT gmt = new GenerateGMT(bot.gdbs, bot.getClient());
 			
-			String result = gmt.createGMTFile(bot.getCache().getFiles());
-			FileWriter writer = new FileWriter(output);
-			writer.write(result);
-			writer.close();
+			Calendar cal = Calendar.getInstance();
+	        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+	        String date = sdf.format(cal.getTime());
+			
+	        String syscode = args[2];
+	        
+			Map<String, String> res = gmt.createGMTFile(bot.getCache().getFiles(), date, syscode);
+//			String result = gmt.createGMTFile(bot.getCache().getFiles());
+			
+			for(String s : res.keySet()) {
+				File f = new File(output, s);
+				f.mkdir();
+				File out = new File(f, "wikipathways_" + syscode + "_" + date + ".gmt");
+				FileWriter writer = new FileWriter(out);
+				writer.write(res.get(s));
+				writer.close();
+				
+				File out2 = new File(f, "wikipathways_" + syscode + ".gmt");
+				FileWriter writer2 = new FileWriter(out2);
+				writer2.write(res.get(s));
+				writer2.close();
+			}
 		} catch(Exception e) {
 			e.printStackTrace();
 			printUsage();
