@@ -100,7 +100,21 @@ public class GMTBot extends Bot {
 	        String syscode = args[2];
 	        
 			Map<String, String> res = gmt.createGMTFile(bot.getCache().getFiles(), date, syscode);
-//			String result = gmt.createGMTFile(bot.getCache().getFiles());
+			
+			{
+				File f1 = new File(output, "wikipathways.gmt");
+				File f2 = new File(output, "wikipathways" + date + ".gmt");
+				FileWriter writer1 = new FileWriter(f1);
+				FileWriter writer2 = new FileWriter(f2);
+					
+				for(String s : res.keySet()) {
+					writer1.write(s + "\n");
+					writer2.write(s + "\n");
+				}
+					
+				writer1.close();
+				writer2.close();
+			}
 			
 			for(String s : res.keySet()) {
 				File f = new File(output, s);

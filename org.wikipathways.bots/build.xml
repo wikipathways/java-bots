@@ -3,7 +3,7 @@
 	<property name="src.dir" value="src"/>
 	<property name="debug.mode" value="true"/>
 
-	<property name="version" value="3.2.0"/>
+	<property name="version" value="3.2.1"/>
 	
 	<property name="jar.name" value="org.wikipathways.bots-${version}.jar"/>
 	<property name="build.dir" value="build"/>
