@@ -101,7 +101,7 @@ public class GenerateGMT {
 				}
 				if(gs.getGenes().size() > 0) {
 					if(!output.containsKey(org)) {
-						output.put(org, new ArrayList<>());
+						output.put(org, new ArrayList<GeneSet>());
 					}
 					output.get(org).add(gs);
 				}
