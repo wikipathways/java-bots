@@ -17,11 +17,14 @@
 package org.wikipathways.bots.utils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +37,8 @@ import org.bridgedb.rdb.GdbProvider;
 import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.wikipathways.webservice.WSCurationTag;
+import org.pathvisio.wikipathways.webservice.WSPathwayInfo;
+import org.wikipathways.client.WikiPathwaysCache;
 import org.wikipathways.client.WikiPathwaysClient;
 
 /**
@@ -53,15 +58,17 @@ public class GenerateGMT {
 			"Curation:AnalysisCollection",
 	};
 	private WikiPathwaysClient client;
+	private WikiPathwaysCache cache;
 	
-	public GenerateGMT(GdbProvider idmp, WikiPathwaysClient client) throws IOException {
+	public GenerateGMT(GdbProvider idmp, WikiPathwaysClient client, WikiPathwaysCache cache) throws IOException {
 		this.idmp = idmp;
 		this.client = client;
+		this.cache = cache;
 	}
 	
-	public Map<String,String> createGMTFile(Collection<File> pathwayFiles, String date, String syscode) throws ConverterException, IDMapperException, RemoteException {
+	public Map<Organism, List<GeneSet>> createGMTFile(Collection<File> pathwayFiles, String syscode) throws ConverterException, IDMapperException, FileNotFoundException, IOException {
 		
-		Map<String, String> output = new HashMap<String, String>();
+		Map<Organism, List<GeneSet>> output = new HashMap<Organism, List<GeneSet>>();
 		
 		Set<String> includeIds = new HashSet<String>();
 		for(String tag : includeTags) {
@@ -74,39 +81,76 @@ public class GenerateGMT {
 		
 		int count = 1;
 		int size = includeIds.size();
-		// gene set name / gene set URL / gene set
+
 		for(File f : pathwayFiles) {
-			String id = f.getName().substring(0, f.getName().length()-5);
-			if(includeIds.contains(id)) {
-				System.out.println(count + " out of  " + size + " pathways.");
+			WSPathwayInfo i = cache.getPathwayInfo(f);
+			if(includeIds.contains(i.getId())) {
 				Pathway p = new Pathway();
 				p.readFromXml(f, true);
-				IDMapperStack stack = idmp.getStack(Organism.fromLatinName(p.getMappInfo().getOrganism()));
+				Organism org = Organism.fromLatinName(i.getSpecies());
+				IDMapperStack stack = idmp.getStack(org);
+				GeneSet gs = new GeneSet(org, p, i.getId(), i.getRevision());
 				
-				Set<String> ids = new HashSet<String>();
+				System.out.println(count + " out of  " + size + " pathways.");
+				
 				for(Xref x : p.getDataNodeXrefs()) {
 					Set<Xref> res = stack.mapID(x, DataSource.getExistingBySystemCode(syscode));
 					for(Xref xref : res) {
-						ids.add(xref.getId());
+						gs.getGenes().add(xref.getId());
 					}
 				}
-				if(ids.size() > 0) {
-					String org = p.getMappInfo().getOrganism();
+				if(gs.getGenes().size() > 0) {
 					if(!output.containsKey(org)) {
-						output.put(org, "");
+						output.put(org, new ArrayList<>());
 					}
-					String buffer = output.get(org);
-					buffer = buffer + p.getMappInfo().getMapInfoName() + "%" + "WikiPathways_" + date + "%" + id + "\t" + "http://www.wikipathways.org/instance/" + id;
-					for(String s : ids) {
-						buffer = buffer + "\t" + s;	
-					}
-					buffer = buffer + "\n";
-					output.put(org, buffer);
+					output.get(org).add(gs);
 				}
 				count++;
 			}
 		}
 		
 		return output;
+	}
+	
+	public class GeneSet {
+		private Organism org;
+		private Pathway pwy;
+		private String pwyId;
+		private String pwyRev;
+		private Set<String> genes;
+		private String pwyName;
+		
+		public GeneSet(Organism org, Pathway pwy, String pwyId, String pwyRev) {
+			this.org = org;
+			this.pwy = pwy;
+			this.pwyId = pwyId;
+			this.pwyRev = pwyRev;
+			pwyName = pwy.getMappInfo().getMapInfoName();
+			genes = new HashSet<String>();
+		}
+
+		public Organism getOrg() {
+			return org;
+		}
+
+		public Pathway getPwy() {
+			return pwy;
+		}
+
+		public String getPwyId() {
+			return pwyId;
+		}
+
+		public String getPwyRev() {
+			return pwyRev;
+		}
+
+		public Set<String> getGenes() {
+			return genes;
+		}
+		
+		public String getPwyName() {
+			return pwyName;
+		}
 	}
 }

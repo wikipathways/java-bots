@@ -22,14 +22,17 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.bridgedb.bio.DataSourceTxt;
+import org.bridgedb.bio.Organism;
 import org.bridgedb.rdb.GdbProvider;
 import org.pathvisio.core.debug.Logger;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.wikipathways.bots.utils.GenerateGMT;
+import org.wikipathways.bots.utils.GenerateGMT.GeneSet;
 
 /**
  * Bot creates a GMT file 
@@ -91,48 +94,59 @@ public class GMTBot extends Bot {
 
 			File output = new File(args[1]);
 			
-			GenerateGMT gmt = new GenerateGMT(bot.gdbs, bot.getClient());
+			GenerateGMT gmt = new GenerateGMT(bot.gdbs, bot.getClient(), bot.getCache());
+			
+			String syscode = args[2];
+			
+			Map<Organism, List<GeneSet>> res = gmt.createGMTFile(bot.getCache().getFiles(), syscode);
+			
 			
 			Calendar cal = Calendar.getInstance();
 	        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 	        String date = sdf.format(cal.getTime());
-			
-	        String syscode = args[2];
-	        
-			Map<String, String> res = gmt.createGMTFile(bot.getCache().getFiles(), date, syscode);
-			
+						
 			{
 				File f1 = new File(output, "wikipathways.gmt");
 				File f2 = new File(output, "wikipathways" + date + ".gmt");
 				FileWriter writer1 = new FileWriter(f1);
 				FileWriter writer2 = new FileWriter(f2);
 					
-				for(String s : res.keySet()) {
-					writer1.write(s + "\n");
-					writer2.write(s + "\n");
-				}
-					
+				for(Organism org : res.keySet()) {
+					for(GeneSet gs : res.get(org)) {
+						writer1.write(printGeneSet(gs, date) + "\n");
+						writer2.write(printGeneSet(gs, date) + "\n");
+					}
+				}	
 				writer1.close();
 				writer2.close();
 			}
 			
-			for(String s : res.keySet()) {
-				File f = new File(output, s);
+			for(Organism s : res.keySet()) {
+				File f = new File(output, s.latinName());
 				f.mkdir();
 				File out = new File(f, "wikipathways_" + syscode + "_" + date + ".gmt");
-				FileWriter writer = new FileWriter(out);
-				writer.write(res.get(s));
-				writer.close();
-				
 				File out2 = new File(f, "wikipathways_" + syscode + ".gmt");
+				FileWriter writer = new FileWriter(out);
 				FileWriter writer2 = new FileWriter(out2);
-				writer2.write(res.get(s));
+				for(GeneSet gs : res.get(s)) {
+					writer.write(printGeneSet(gs, date) + "\n");
+					writer2.write(printGeneSet(gs, date) + "\n");
+				}
+				writer.close();
 				writer2.close();
-			}
+			}	
 		} catch(Exception e) {
 			e.printStackTrace();
 			printUsage();
 		}
+	}
+	
+	private static String printGeneSet(GeneSet gs, String date) {
+		String output = gs.getPwyName() + "%WikiPathways_" +  date + "%" + gs.getPwyId() + "%" + gs.getOrg().latinName() + "\t" + "http://www.wikipathways.org/instance/" + gs.getPwyId() + "_r" + gs.getPwyRev();
+		for(String g : gs.getGenes()) {
+			output = output + "\t" + g;
+		}
+		return output;
 	}
 
 	static private void printUsage() {
