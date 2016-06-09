@@ -3,7 +3,7 @@
 	<property name="src.dir" value="src"/>
 	<property name="debug.mode" value="true"/>
 
-	<property name="version" value="3.2.1"/>
+	<property name="version" value="3.2.2"/>
 	
 	<property name="jar.name" value="org.wikipathways.bots-${version}.jar"/>
 	<property name="build.dir" value="build"/>
@@ -41,7 +41,7 @@
 		<unjar src="lib/derby.jar" dest="${build.dir}"/>
 		<unjar src="lib/org.bridgedb.rdb.construct.jar" dest="${build.dir}"/>
 		<unjar src="lib/org.bridgedb.rdb.jar" dest="${build.dir}"/>
-		<unjar src="lib/org.wikipathways.client.lib.jar" dest="${build.dir}"/>
+		<unjar src="lib/org.wikipathways.webservice.api.lib.jar" dest="${build.dir}"/>
 
 		<echo>Creating JAR: ${jar.name}</echo>
 		<jar jarfile="${jar.name}" basedir="${build.dir}"/>

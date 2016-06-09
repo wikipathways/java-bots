@@ -19,13 +19,10 @@ package org.wikipathways.bots.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.bridgedb.DataSource;
@@ -66,14 +63,16 @@ public class GenerateGMT {
 		this.cache = cache;
 	}
 	
-	public Map<Organism, List<GeneSet>> createGMTFile(Collection<File> pathwayFiles, String syscode) throws ConverterException, IDMapperException, FileNotFoundException, IOException {
+	public List<GeneSet> createGMTFile(Collection<File> pathwayFiles, String syscode, Organism organism) throws ConverterException, IDMapperException, FileNotFoundException, IOException {
 		
-		Map<Organism, List<GeneSet>> output = new HashMap<Organism, List<GeneSet>>();
+		List<GeneSet> output = new ArrayList<GeneSet>();
 		
 		Set<String> includeIds = new HashSet<String>();
 		for(String tag : includeTags) {
 			for(WSCurationTag t : client.getCurationTagsByName(tag)) {
-				includeIds.add(t.getPathway().getId());
+				if(t.getPathway().getSpecies().equals(organism.latinName())) {
+					includeIds.add(t.getPathway().getId());
+				}
 			}
 		}
 		
@@ -99,11 +98,9 @@ public class GenerateGMT {
 						gs.getGenes().add(xref.getId());
 					}
 				}
-				if(gs.getGenes().size() > 0) {
-					if(!output.containsKey(org)) {
-						output.put(org, new ArrayList<GeneSet>());
-					}
-					output.get(org).add(gs);
+				
+				if(gs.getGenes().size() > 0) { 
+					output.add(gs); 
 				}
 				count++;
 			}

@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.bridgedb.bio.DataSourceTxt;
@@ -43,6 +42,13 @@ import org.wikipathways.bots.utils.GenerateGMT.GeneSet;
 public class GMTBot extends Bot {
 
 	private static final String PROP_GDBS = "gdb-config";
+	// properties: 
+	// webservice-url
+	// cache-path
+	// gdb-config
+	// threshold
+	// syscode (optional)
+	// organism (optional)
 	GdbProvider gdbs;
 	
 	public GMTBot(Properties props) throws BotException {
@@ -60,26 +66,16 @@ public class GMTBot extends Bot {
 	
 	@Override
 	public BotReport createReport(Collection<Result> result) {
-		BotReport report = new BotReport(
-				new String[] {
-					"Entrez Gene ids"
-				}
-			);
-		
-		report.setTitle("GMT file generation report");
-		report.setDescription("GMT bot creates GMT file");
 		return null;
 	}
 
 	@Override
 	public String getTagName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	protected Result scanPathway(File pathwayFile) throws BotException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -92,49 +88,32 @@ public class GMTBot extends Bot {
 			GMTBot bot =  new GMTBot(props);
 			bot.getCache().update();
 
-			File output = new File(args[1]);
-			
-			GenerateGMT gmt = new GenerateGMT(bot.gdbs, bot.getClient(), bot.getCache());
-			
-			String syscode = args[2];
-			
-			Map<Organism, List<GeneSet>> res = gmt.createGMTFile(bot.getCache().getFiles(), syscode);
-			
-			
 			Calendar cal = Calendar.getInstance();
 	        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 	        String date = sdf.format(cal.getTime());
-						
-			{
-				File f1 = new File(output, "wikipathways.gmt");
-				File f2 = new File(output, "wikipathways" + date + ".gmt");
-				FileWriter writer1 = new FileWriter(f1);
-				FileWriter writer2 = new FileWriter(f2);
-					
-				for(Organism org : res.keySet()) {
-					for(GeneSet gs : res.get(org)) {
-						writer1.write(printGeneSet(gs, date) + "\n");
-						writer2.write(printGeneSet(gs, date) + "\n");
-					}
-				}	
-				writer1.close();
-				writer2.close();
-			}
 			
-			for(Organism s : res.keySet()) {
-				File f = new File(output, s.latinName());
-				f.mkdir();
-				File out = new File(f, "wikipathways_" + syscode + "_" + date + ".gmt");
-				File out2 = new File(f, "wikipathways_" + syscode + ".gmt");
-				FileWriter writer = new FileWriter(out);
-				FileWriter writer2 = new FileWriter(out2);
-				for(GeneSet gs : res.get(s)) {
+			File output = new File(args[1], date);
+			output.mkdirs();
+			
+			GenerateGMT gmt = new GenerateGMT(bot.gdbs, bot.getClient(), bot.getCache());
+			
+			String syscode = "L";
+			if(props.getProperty("syscode") != null) {
+				syscode = props.getProperty("syscode");
+			}
+
+			
+			String [] orgs = bot.getClient().listOrganisms();
+			for(String o : orgs) {
+				Organism org = Organism.fromLatinName(o);
+				List<GeneSet> res = gmt.createGMTFile(bot.getCache().getFiles(), syscode, org);
+				File f = new File(output, "gmt_wp_" + org.latinName().replace(" ", "_") + ".gmt");
+				FileWriter writer = new FileWriter(f);
+				for(GeneSet gs : res) {
 					writer.write(printGeneSet(gs, date) + "\n");
-					writer2.write(printGeneSet(gs, date) + "\n");
 				}
 				writer.close();
-				writer2.close();
-			}	
+			}
 		} catch(Exception e) {
 			e.printStackTrace();
 			printUsage();
