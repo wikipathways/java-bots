@@ -230,6 +230,7 @@ public abstract class Bot {
 		public abstract boolean equalsTag(String tag);
 		public abstract String getTagText();
 		public abstract boolean shouldTag();
+		public abstract boolean shouldPrint();
 	}
 
 	public static class BotException extends Exception {

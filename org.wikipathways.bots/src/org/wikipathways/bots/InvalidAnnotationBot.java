@@ -79,16 +79,18 @@ public class InvalidAnnotationBot extends Bot {
 		report.setTitle("InvalidAnnotationBot scan report");
 		report.setDescription("The InvalidAnnotationBot checks for invalid DataNode annotations");
 		for(Result r : results) {
-			XRefResult xr = (XRefResult)r;
-			report.setRow(
-					r.getPathwayInfo(),
-					new String[] {
-						"" + xr.getNrXrefs(),
-						"" + xr.getNrInvalid(),
-						"" + (int)(xr.getPercentInvalid() * 100) / 100, //Round to two decimals
-						"" + xr.getLabelsForInvalid()
-					}
-			);
+			if(r.shouldPrint()) {
+				XRefResult xr = (XRefResult)r;
+				report.setRow(
+						r.getPathwayInfo(),
+						new String[] {
+							"" + xr.getNrXrefs(),
+							"" + xr.getNrInvalid(),
+							"" + (int)(xr.getPercentInvalid() * 100) / 100, //Round to two decimals
+							"" + xr.getLabelsForInvalid()
+						}
+				);
+			}
 		}
 		return report;
 	}
@@ -215,6 +217,14 @@ public class InvalidAnnotationBot extends Bot {
 				" DataNodes have an incorrect external reference: " +
 				"<span title=\"" + labels[0] + "\">" + labels[1] + "</span>";
 			return txt;
+		}
+
+		@Override
+		public boolean shouldPrint() {
+			if(getPercentValid()<100.0) {
+				return true;
+			}
+			return false;
 		}
 	}
 

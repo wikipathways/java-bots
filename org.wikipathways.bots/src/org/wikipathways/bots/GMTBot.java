@@ -107,12 +107,14 @@ public class GMTBot extends Bot {
 			for(String o : orgs) {
 				Organism org = Organism.fromLatinName(o);
 				List<GeneSet> res = gmt.createGMTFile(bot.getCache().getFiles(), syscode, org);
-				File f = new File(output, "gmt_wp_" + org.latinName().replace(" ", "_") + ".gmt");
-				FileWriter writer = new FileWriter(f);
-				for(GeneSet gs : res) {
-					writer.write(printGeneSet(gs, date) + "\n");
+				if(res.size() > 0) {
+					File f = new File(output, "gmt_wp_" + org.latinName().replace(" ", "_") + ".gmt");
+					FileWriter writer = new FileWriter(f);
+					for(GeneSet gs : res) {
+						writer.write(printGeneSet(gs, date) + "\n");
+					}
+					writer.close();
 				}
-				writer.close();
 			}
 		} catch(Exception e) {
 			e.printStackTrace();

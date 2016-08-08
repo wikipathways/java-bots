@@ -47,9 +47,11 @@ public class DescriptionBot extends Bot {
 
 		int nrMissing = 0;
 		for(Result r : result) {
-			DescriptionResult dr = (DescriptionResult)r;
-			if(!dr.hasDescription) nrMissing++;
-			report.setRow(dr.getPathwayInfo(), new String[] { dr.hasDescription + "" });
+			if(r.shouldPrint()) {
+				DescriptionResult dr = (DescriptionResult)r;
+				if(!dr.hasDescription) nrMissing++;
+				report.setRow(dr.getPathwayInfo(), new String[] { dr.hasDescription + "" });
+			}
 		}
 		report.setComment("Number of pathways", "" + result.size());
 		report.setComment("Number of pathways missing description", "" + nrMissing);
@@ -121,6 +123,11 @@ public class DescriptionBot extends Bot {
 		}
 
 		public boolean shouldTag() {
+			return !hasDescription;
+		}
+
+		@Override
+		public boolean shouldPrint() {
 			return !hasDescription;
 		}
 	}

@@ -66,16 +66,18 @@ public class MissingAnnotationBot extends Bot {
 		report.setDescription("The XRefBot checks for valid DataNode annotations");
 
 		for(Result r : results) {
-			XRefResult xr = (XRefResult)r;
-			report.setRow(
-				xr.getPathwayInfo(),
-				new String[] {
-					"" + xr.getNrXrefs(),
-					"" + xr.getNrValid(),
-					"" + (int)(xr.getPercentValid() * 100) / 100, 
-					"" + xr.getLabelsForInvalid()
-				}
-			);
+			if(r.shouldPrint()) {
+				XRefResult xr = (XRefResult)r;
+				report.setRow(
+					xr.getPathwayInfo(),
+					new String[] {
+						"" + xr.getNrXrefs(),
+						"" + xr.getNrValid(),
+						"" + (int)(xr.getPercentValid() * 100) / 100, 
+						"" + xr.getLabelsForInvalid()
+					}
+				);
+			}
 		}
 		return report;
 	}
@@ -154,56 +156,22 @@ public class MissingAnnotationBot extends Bot {
 			return labels;
 		}
 
-		private String[] getLabelStrings() {
-			List<String> labels = getLabelsForInvalid();
-			Collections.sort(labels);
-			String labelString = "";
-			String labelStringTrun = "";
-			for(int i = 0; i < labels.size(); i++) {
-				labelString += labels.get(i) + ", ";
-				if(i < 3) {
-					labelStringTrun += labels.get(i) + ", ";
-				} else if(i == 3) {
-					labelStringTrun += " ..., ";
-				}
-			}
-			if(labelString.length() > 2) {
-				labelString = labelString.substring(0, labelString.length() - 2);
-			}
-			if(labelStringTrun.length() > 2) {
-				labelStringTrun = labelStringTrun.substring(0, labelStringTrun.length() - 2);
-			}
-			return new String[] { labelString, labelStringTrun };
-		}
-
 		/**
 		 * adapted function because of webservice issues when
 		 * using tags longer than 300 letters
 		 */
 		public String getTagText() {
-			String[] labels = getLabelStrings();
-			
-			String labelTitle = labels[0];
-			labelTitle = labelTitle.replace("\n", " ");
-			labelTitle = labelTitle.replace("/", " ");
-			String labelText = labels[1];
-			labelText = labelText.replace("\n", " ");
-			labelText = labelText.replace("/", " ");
-			
-			String front = getNrInvalid() + " out of " + getNrXrefs() +
-					" DataNodes have a missing external reference: " +
-					"<span title=\"";
-			
-			String middle = "\">";
-			String end = "</span>";
-			
-			int max = 300 - (front.length() + middle.length() + end.length() + labelText.length());
-			if(labelTitle.length() > max) {
-				labelTitle = labelTitle.substring(0, max-4) + ",...";
+			String txt = getNrInvalid() + " out of " + getNrXrefs() +
+					" DataNodes have a missing external reference. Check DataNode table at the bottom of the page.";
+				return txt;
+		}
+
+		@Override
+		public boolean shouldPrint() {
+			if(getPercentValid()<100.0) {
+				return true;
 			}
-			
-			String txt = front + labelTitle + middle + labelText + end;
-			return txt;
+			return false;
 		}
 	}
 

@@ -74,9 +74,11 @@ public class LiteratureBot extends Bot {
 
 		int nrMissing = 0;
 		for(Result r : result) {
-			LiteratureResult dr = (LiteratureResult)r;
-			if(!dr.hasReference) nrMissing++;
-			report.setRow(dr.getPathwayInfo(), new String[] { dr.hasReference + "" });
+			if(r.shouldPrint()) {
+				LiteratureResult dr = (LiteratureResult)r;
+				if(!dr.hasReference) nrMissing++;
+				report.setRow(dr.getPathwayInfo(), new String[] { dr.hasReference + "" });
+			}
 		}
 		report.setComment("Number of pathways", "" + result.size());
 		report.setComment("Number of pathways without literature reference", "" + nrMissing);
@@ -100,6 +102,11 @@ public class LiteratureBot extends Bot {
 		}
 
 		public boolean shouldTag() {
+			return !hasReference;
+		}
+
+		@Override
+		public boolean shouldPrint() {
 			return !hasReference;
 		}
 	}

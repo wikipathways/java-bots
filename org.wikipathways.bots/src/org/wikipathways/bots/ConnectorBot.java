@@ -59,15 +59,17 @@ public class ConnectorBot extends Bot {
 		report.setTitle("ConnectorBot scan report");
 		report.setDescription("The ConnectorBot checks for properly connected lines");
 		for(Result r : results) {
-			ConnectorBotResult cr = (ConnectorBotResult)r;
-			report.setRow(
-					r.getPathwayInfo(),
-					new String[] {
-						"" + cr.getNrLines(),
-						"" + cr.getNrValid(),
-						"" + (int)(cr.getPercentValid() * 100) / 100 //Round to two decimals
-					}
-			);
+			if(r.shouldPrint()) {
+				ConnectorBotResult cr = (ConnectorBotResult)r;
+				report.setRow(
+						r.getPathwayInfo(),
+						new String[] {
+							"" + cr.getNrLines(),
+							"" + cr.getNrValid(),
+							"" + (int)(cr.getPercentValid() * 100) / 100 //Round to two decimals
+						}
+				);
+			}
 		}
 		return report;
 	}
@@ -155,6 +157,14 @@ public class ConnectorBot extends Bot {
 			String txt = getNrInvalid() + " out of " + getNrLines() +
 				" lines are not properly connected.";
 			return txt;
+		}
+
+		@Override
+		public boolean shouldPrint() {
+			if(getPercentValid()<100.0) {
+				return true;
+			}
+			return false;
 		}
 	}
 
