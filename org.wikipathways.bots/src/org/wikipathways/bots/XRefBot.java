@@ -208,8 +208,7 @@ public class XRefBot extends Bot {
 				labels[0] = labels[0].substring(0, 300) + "...";
 			}
 			String txt = getNrInvalid() + " out of " + getNrXrefs() +
-				" DataNodes have an incorrect or missing external reference: " +
-				"<span title=\"" + labels[0] + "\">" + labels[1] + "</span>";
+				" DataNodes have an incorrect or missing external reference. Check DataNode table at the bottom of the page.";
 			return txt;
 		}
 	}

@@ -64,7 +64,9 @@ public abstract class Bot {
 			if(cacheStr == null) {
 				throw new BotException("Property cache-path is missing");
 			}
-			cache = new WikiPathwaysCache(new File(cacheStr));
+			File c = new File(cacheStr);
+			if(!c.exists()) c.mkdir();
+			cache = new WikiPathwaysCache(c);
 
 			//Login if possible
 			user = props.getProperty(PROP_USER);
@@ -73,8 +75,7 @@ public abstract class Bot {
 				client.login(user, pass);
 			}
 		} catch (Exception e) {
-			if(e instanceof BotException) throw (BotException)e;
-			else throw new BotException(e);
+			throw new BotException(e);
 		}
 	}
 
