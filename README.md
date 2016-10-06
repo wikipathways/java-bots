@@ -1,7 +1,7 @@
 # java-bots
-Automatic Java bots for WikiPathways
-
-Currently under development.
+Java bots for WikiPathways 
+- All bots are running regularly (usually once every day) 
+- Results can be viewed here: http://www.pathvisio.org/data/bots/
 
 ### Available bots:
 - Missing description (adds curation tag to pathways without description)
