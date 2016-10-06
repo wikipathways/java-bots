@@ -85,6 +85,7 @@ public class RSSMBot extends Bot {
 			RSSMBot bot = new RSSMBot(props);
 			File output = new File(args[1]);
 			
+			bot.getCache().update();
 			GenerateRSSM rssm = new GenerateRSSM(bot.getCache(), bot.getClient(), bot.gdbs);
 			rssm.setSourceUrl("http://www.wikipathways.org");
 			

@@ -53,6 +53,7 @@ import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayElement.Comment;
 import org.pathvisio.core.view.VPathway;
 import org.pathvisio.wikipathways.webservice.WSCurationTag;
 import org.pathvisio.wikipathways.webservice.WSPathwayInfo;
@@ -186,17 +187,17 @@ public class GenerateRSSM {
 		Element orgtype = new Element("organism_specific_biosystem");
 		systype.addContent(orgtype);
 		
-//		String descr = null;
-//		for(Comment c : p.getMappInfo().getComments()) {
-//			if(COMMENT_DESCRIPTION.equals(c.getSource())) {
-//				if(!"".equals(c.getComment())) descr = c.getComment();
-//			}
-//		}
-//		if(descr != null) {
-//			Element description = new Element("description");
-//			description.setText(descr);
-//			biosystem.addContent(description);
-//		}
+		String descr = null;
+		for(Comment c : p.getMappInfo().getComments()) {
+			if(c.getSource() != null && COMMENT_DESCRIPTION.equals(c.getSource())) {
+				if(!"".equals(c.getComment())) descr = c.getComment();
+			}
+		}
+		if(descr != null) {
+			Element description = new Element("description");
+			description.setText(descr);
+			biosystem.addContent(description);
+		}
 		
 		addThumb(biosystem, p);
 		
