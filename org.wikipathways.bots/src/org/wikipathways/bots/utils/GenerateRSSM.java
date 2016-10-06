@@ -53,7 +53,6 @@ import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
-import org.pathvisio.core.model.PathwayElement.Comment;
 import org.pathvisio.core.view.VPathway;
 import org.pathvisio.wikipathways.webservice.WSCurationTag;
 import org.pathvisio.wikipathways.webservice.WSPathwayInfo;
@@ -187,17 +186,17 @@ public class GenerateRSSM {
 		Element orgtype = new Element("organism_specific_biosystem");
 		systype.addContent(orgtype);
 		
-		String descr = null;
-		for(Comment c : p.getMappInfo().getComments()) {
-			if(COMMENT_DESCRIPTION.equals(c.getSource())) {
-				if(!"".equals(c.getComment())) descr = c.getComment();
-			}
-		}
-		if(descr != null) {
-			Element description = new Element("description");
-			description.setText(descr);
-			biosystem.addContent(description);
-		}
+//		String descr = null;
+//		for(Comment c : p.getMappInfo().getComments()) {
+//			if(COMMENT_DESCRIPTION.equals(c.getSource())) {
+//				if(!"".equals(c.getComment())) descr = c.getComment();
+//			}
+//		}
+//		if(descr != null) {
+//			Element description = new Element("description");
+//			description.setText(descr);
+//			biosystem.addContent(description);
+//		}
 		
 		addThumb(biosystem, p);
 		
@@ -245,15 +244,15 @@ public class GenerateRSSM {
 				pmid.setText(x.getPubmedId());
 				citation.addContent(pmid);
 			} else {
-				Element cit = new Element("textcitation");
-				String txt = "";
-				if(!"".equals(x.getAuthorString())) txt += x.getAuthorString() + ", ";
-				if(!"".equals(x.getTitle())) txt += x.getTitle() + ". ";
-				if(!"".equals(x.getSource())) txt += x.getSource() + " ";
-				if(!"".equals(x.getYear())) txt += "(" + x.getYear() + ")";
-				
-				cit.setText(txt);
-				citation.addContent(cit);
+//				Element cit = new Element("textcitation");
+//				String txt = "";
+//				if(!"".equals(x.getAuthorString())) txt += x.getAuthorString() + ", ";
+//				if(!"".equals(x.getTitle())) txt += x.getTitle() + ". ";
+//				if(!"".equals(x.getSource())) txt += x.getSource() + " ";
+//				if(!"".equals(x.getYear())) txt += "(" + x.getYear() + ")";
+//				
+//				cit.setText(txt);
+//				citation.addContent(cit);
 			}
 		}
 	}
@@ -399,15 +398,29 @@ public class GenerateRSSM {
 		
 		Element citations = new Element("citations");
 		root.addContent(citations);
-		Element citation = new Element("citation");
-		citations.addContent(citation);
-		Element pmid = new Element("pmid");
-		pmid.setText("18651794");
-		citation.addContent(pmid);
-		citation = new Element("citation");
-		citations.addContent(citation);
-		Element textcitation = new Element("textcitation");
-		textcitation.setText("Pico AR, Kelder T, van Iersel MP, Hanspers K, Conklin BR, and C.T.A. Evelo (2008) WikiPathways: Pathway Editing for the People. PLoS Biol 6(7): e184. doi:10.1371/journal.pbio.0060184");
-		citation.addContent(textcitation);
+		
+		Element citation1 = new Element("citation");
+		citations.addContent(citation1);
+		Element pmid1 = new Element("pmid");
+		pmid1.setText("18651794");
+		citation1.addContent(pmid1);
+		
+		Element citation2 = new Element("citation");
+		citations.addContent(citation2);
+		Element textcitation1 = new Element("textcitation");
+		textcitation1.setText("Pico AR, Kelder T, van Iersel MP, Hanspers K, Conklin BR, and C.T.A. Evelo (2008) WikiPathways: Pathway Editing for the People. PLoS Biol 6(7): e184. doi:10.1371/journal.pbio.0060184");
+		citation2.addContent(textcitation1);
+		
+		Element citation3 = new Element("citation");
+		citations.addContent(citation3);
+		Element pmid2 = new Element("pmid");
+		pmid2.setText("26481357");
+		citation3.addContent(pmid2);
+		
+		Element citation4 = new Element("citation");
+		citations.addContent(citation4);
+		Element textcitation2 = new Element("textcitation");
+		textcitation2.setText("Kutmon M, Riutta A, Nunes N, Hanspers K, Willighagen EL, Bohler A, Melius J, Waagmeester A, Sinah SR, Miller R, Coort SL, Cirillo E, Smeets B, Evelo CT, and Pico AR (2016) WikiPathways: capturing the full diversity of pathway knowledge. Nucleic Acids Res. 2016 Jan 4;44(D1):D488-94. doi: 10.1093/nar/gkv1024.");
+		citation4.addContent(textcitation2);
 	}
 }
