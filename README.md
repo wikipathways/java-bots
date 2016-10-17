@@ -2,7 +2,7 @@
 Java bots for WikiPathways 
 - All bots are running regularly (usually once every day) 
 - Results can be viewed here: http://www.pathvisio.org/data/bots/
-- Example launch command: ```java -Xmx2048m -Dfile.encoding=UTF-8 -cp org.wikipathways.bots-3.2.2.jar org.wikipathways.bots.GMTBot gmt-bot.props gmt-output.gmt```
+- Example launch command: ```java -Xmx2048m -Dfile.encoding=UTF-8 -cp org.wikipathways.bots-3.2.2.jar org.wikipathways.bots.GMTBot gmt-bot.props gmt-output```
 
 
 ### Available bots:
