@@ -92,7 +92,7 @@ public class GenerateRSSM {
 	
 	private void initTaxids() throws IOException {
 		Pattern p = Pattern.compile("<Id>([0-9]+)<\\/Id>");
-		String base = "http://www.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term=";
+		String base = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term=";
 		for(String org : client.listOrganisms()) {
 			URL url = new URL(base + URLEncoder.encode(org, "UTF-8"));
 			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -106,7 +106,7 @@ public class GenerateRSSM {
 				}
 			}
 			in.close();
-			
+			System.out.println(org + "\t" + tax);
 			if(tax != null) org2taxid.put(org, tax);
 		}
 	}
@@ -114,10 +114,6 @@ public class GenerateRSSM {
 	public void setIncludeTags(String[] includeTags) {
 		this.includeTags = includeTags;
 	}
-	
-//	public void setExcludeTags(String[] excludeTags) {
-//		this.excludeTags = excludeTags;
-//	}
 	
 	public void setSourceUrl(String sourceUrl) {
 		this.sourceUrl = sourceUrl;
@@ -135,30 +131,19 @@ public class GenerateRSSM {
 		addGeneralSection(root);
 		
 		System.out.println("Getting list of pathways to filter out based on curation tag");
-//		Set<String> excludeIds = new HashSet<String>();
-//		for(String tag : excludeTags) {
-//			for(WSCurationTag t : client.getCurationTagsByName(tag)) {
-//				excludeIds.add(t.getPathway().getId());
-//			}
-//		}
-//		log.info("Filtering out " + excludeIds.size() + " pathways based on tag.");
 		Set<String> includeIds = new HashSet<String>();
 		for(String tag : includeTags) {
 			for(WSCurationTag t : client.getCurationTagsByName(tag)) {
 				includeIds.add(t.getPathway().getId());
 			}
 		}
-//		log.info("Including " + excludeIds.size() + " pathways based on tag.");
 		
 		int i = 0;
 		for(File f : pathwayFiles) {
 			if(i % 10 == 0) System.out.println("Processing pathway " + ++i + " out of " + pathwayFiles.size());
 			
 			WSPathwayInfo info = cache.getPathwayInfo(f);
-//			if(excludeTags.length > 0 && excludeIds.contains(info.getId())) {
-//				log.info("Skipping " + info.getId() + ", filtered out by curation tag");
-//				continue;
-//			}
+			
 			if(includeTags.length > 0 && !includeIds.contains(info.getId())) {
 				System.out.println("Skipping " + info.getId() + ", filtered out because doesn't have one of the curation tags to include.");
 				continue;
@@ -244,16 +229,6 @@ public class GenerateRSSM {
 				Element pmid = new Element("pmid");
 				pmid.setText(x.getPubmedId());
 				citation.addContent(pmid);
-			} else {
-//				Element cit = new Element("textcitation");
-//				String txt = "";
-//				if(!"".equals(x.getAuthorString())) txt += x.getAuthorString() + ", ";
-//				if(!"".equals(x.getTitle())) txt += x.getTitle() + ". ";
-//				if(!"".equals(x.getSource())) txt += x.getSource() + " ";
-//				if(!"".equals(x.getYear())) txt += "(" + x.getYear() + ")";
-//				
-//				cit.setText(txt);
-//				citation.addContent(cit);
 			}
 		}
 	}
