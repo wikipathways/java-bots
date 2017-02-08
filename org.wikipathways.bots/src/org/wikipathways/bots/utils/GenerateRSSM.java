@@ -106,7 +106,6 @@ public class GenerateRSSM {
 				}
 			}
 			in.close();
-			System.out.println(org + "\t" + tax);
 			if(tax != null) org2taxid.put(org, tax);
 		}
 	}
