@@ -143,28 +143,28 @@ public abstract class Bot {
 						}
 					} else { //No existing tag
 						//See if it was removed by a user
-						String oldtext = checkRemoved(r);
-						if(oldtext != null) {
-							//See if the measured values have changed after the
-							//user removed the tag
-							if(!r.equalsTag(oldtext)) {
-								//Tag has changed, so re-apply
-								Logger.log.info("Re-applying tag to " + pwId);
-								client.saveCurationTag(
-										pwId,
-										getTagName(),r.getTagText()
-								);
-							} else {
-								//Mark the pathway as overridden
-								overrides.add(r.getPathwayInfo());
-							}
-						} else { //No override, add the tag
+//						String oldtext = checkRemoved(r);
+//						if(oldtext != null) {
+//							//See if the measured values have changed after the
+//							//user removed the tag
+//							if(!r.equalsTag(oldtext)) {
+//								//Tag has changed, so re-apply
+//								Logger.log.info("Re-applying tag to " + pwId);
+//								client.saveCurationTag(
+//										pwId,
+//										getTagName(),r.getTagText()
+//								);
+//							} else {
+//								//Mark the pathway as overridden
+//								overrides.add(r.getPathwayInfo());
+//							}
+//						} else { //No override, add the tag
 							Logger.log.info("Applying new tag to " + pwId);
 							client.saveCurationTag(
 									pwId,
 									getTagName(),r.getTagText()
 							);
-						}
+//						}
 					}
 				} else { //Remove tag if needed
 					if(tag != null) {
