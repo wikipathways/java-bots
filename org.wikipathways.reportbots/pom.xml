@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.wikipathways</groupId>
+  <artifactId>reportbots</artifactId>
+  <packaging>jar</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <name>WikiPathways Report Bots bundle</name>
+
+  <properties>
+    <src.dir>src</src.dir>
+  </properties>
+
+  <build>
+    <sourceDirectory>${src.dir}</sourceDirectory>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.1</version>
+          <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <!-- cd lib/; mvn install:install-file -Dfile=nl.helixsoft.xml.jar -DgroupId=nl.helixsoft -DartifactId=xml -Dversion=1.0.0 -Dpackaging=jar -->
+      <groupId>nl.helixsoft</groupId>
+      <artifactId>xml</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bridgedb</groupId>
+      <artifactId>org.bridgedb.bio</artifactId>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bridgedb</groupId>
+      <artifactId>org.bridgedb.rdb</artifactId>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <!-- cd lib/; mvn install:install-file -Dfile=org.wikipathways.webservice.api.lib.jar -DgroupId=org.pathvisio -DartifactId=wikipathways-client -Dversion=3.2.1 -Dpackaging=jar -->
+      <groupId>org.pathvisio</groupId>
+      <artifactId>wikipathways-client</artifactId>
+      <version>3.2.1</version>
+    </dependency>
+  </dependencies>
+	
+</project>
