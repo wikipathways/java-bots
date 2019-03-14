@@ -16,19 +16,42 @@
 //
 package org.wikipathways.reportbots;
 
+import java.util.Set;
+
+import org.bridgedb.Xref;
+
 
 public class OutdatedResult {
 	private String pwID;	
 	private String pwName;
 	private String refLabel;
 	private String refID;
+	private Set<Xref> ensOld;
+	private String species;
 	
 	public OutdatedResult(String pwID, String pwName, String refLabel,
-			String refID) {
+			String refID, Set<Xref> ensOld, String species) {
 		this.pwID = pwID;
 		this.pwName = pwName;
 		this.refLabel = refLabel;
 		this.refID = refID;
+		this.ensOld = ensOld;
+		this.species = species;
+	}
+	public OutdatedResult(String pwID, String pwName, String refLabel,
+			String refID ) {
+		this.pwID = pwID;
+		this.pwName = pwName;
+		this.refLabel = refLabel;
+		this.refID = refID;
+	}
+	public OutdatedResult(String pwID, String pwName, String refLabel,
+			String refID,Set<Xref> ensOld ) {
+		this.pwID = pwID;
+		this.pwName = pwName;
+		this.refLabel = refLabel;
+		this.refID = refID;
+		this.ensOld = ensOld;
 	}
 
 	public String getPwID() {
@@ -96,6 +119,20 @@ public class OutdatedResult {
 		} else if (!refLabel.equals(other.refLabel))
 			return false;
 		return true;
+	}
+
+	public Set<Xref> getEnsOld() {
+		return ensOld;
+	}
+
+	public void setEnsOld(Set<Xref> ensOld) {
+		this.ensOld = ensOld;
+	}
+	public String getSpecies() {
+		return species;
+	}
+	public void setSpecies(String species) {
+		this.species = species;
 	}
 	
 }

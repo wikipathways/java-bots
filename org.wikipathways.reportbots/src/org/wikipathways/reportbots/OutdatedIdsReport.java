@@ -48,6 +48,7 @@ import org.bridgedb.bio.Organism;
 import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayElement.Comment;
 import org.pathvisio.wikipathways.webservice.WSPathway;
 import org.pathvisio.wikipathways.webservice.WSPathwayInfo;
 import org.wikipathways.client.WikiPathwaysClient;
@@ -328,5 +329,95 @@ public class OutdatedIdsReport {
 			}
 		}
 		return list;	
+	}
+
+	static Map<String, HashSet<OutdatedResult>> mapIds = new HashMap<String, HashSet<OutdatedResult>>();
+	static Map<String, HashSet<OutdatedResult>> allMapIds = new HashMap<String, HashSet<OutdatedResult>>();
+
+	public static void runAll(String pathOld, String pathNew) 
+			throws ClassNotFoundException, IDMapperException,  IOException, ConverterException {
+
+		URL wsURL = new URL("http://webservice.wikipathways.org");
+		WikiPathwaysClient client = new WikiPathwaysClient(wsURL);	
+
+		Class.forName("org.bridgedb.rdb.IDMapperRdb");
+		DataSourceTxt.init();
+		dsEn = DataSource.getExistingBySystemCode("En");
+		IDMapper mapperNew = BridgeDb.
+				connect("idmapper-pgdb:"+pathNew);
+		mapperOld = BridgeDb.
+				connect("idmapper-pgdb:"+pathOld);
+		
+		species = pathOld.substring(pathOld.lastIndexOf("/")+1, pathOld.lastIndexOf("/")+3);
+		
+		WSPathwayInfo[] pathwayList = client.listPathways(Organism.fromCode(species));
+		
+		species = Organism.fromCode(species).latinName();
+		
+		
+		for(WSPathwayInfo pathwayInfo : pathwayList) {
+
+			WSPathway wsPathway = client.getPathway(pathwayInfo.getId());
+			boolean flag = true;
+			Pathway pathway = WikiPathwaysClient.toPathway(wsPathway);
+			for ( Comment c : pathway.getMappInfo().getComments()){
+				if (c.getSource()!=null && c.getSource().equals("HomologyConvert")){
+					flag=false;
+				}
+			}
+			if (flag){
+				for(PathwayElement pwElm : pathway.getDataObjects()) {
+						if (!mapperNew.xrefExists(pwElm.getXref()) 
+								&& pwElm.getXref().getDataSource()!=null 
+								&& mapperOld.xrefExists(pwElm.getXref()) ){
+
+							String pwID = pathwayInfo.getId();
+							String pwName = pathwayInfo.getName();
+							String refLabel = pwElm.getTextLabel().trim();
+							String refID = pwElm.getXref().toString().trim();
+
+							HashSet<OutdatedResult> xrefList = allMapIds.get(refID);
+
+
+							Set<Xref> ensOld = new HashSet<Xref>();
+
+							if (!pwElm.getXref().getDataSource().equals(dsEn)){
+								ensOld = mapperOld.mapID(pwElm.getXref(), dsEn);
+							}
+
+							if (xrefList==null){
+								HashSet<OutdatedResult> list = new HashSet<OutdatedResult>();							
+								list.add(new OutdatedResult(pwID, pwName, refLabel, refID, ensOld, species));
+								allMapIds.put(refID, list);
+							}
+							else{
+								xrefList.add(new OutdatedResult(pwID, pwName, refLabel, refID, ensOld, species));
+							}	
+						}	
+				}
+			}
+		}
+	}
+	
+	public static void writeAll(String name) throws IOException, IDMapperException{
+		List<Map.Entry<String, HashSet<OutdatedResult>>> keys =
+				new LinkedList<Map.Entry<String, HashSet<OutdatedResult>>>( allMapIds.entrySet());	
+		File file = new File(name);
+		FileWriter fileWriter = new FileWriter(file);
+		
+		for (Entry<String, HashSet<OutdatedResult>> entry : keys){				
+			for (OutdatedResult result : entry.getValue()){				
+				fileWriter.write(
+					result.getRefLabel().trim().replaceAll("\\s+","")+"\t"+
+					result.getPwID()+"\t"+
+					entry.getKey()+"\t"+
+					result.getEnsOld()+"\t"+
+					result.getSpecies()+"\n"
+					);
+			}
+		}
+		fileWriter.flush();
+		fileWriter.close();
+		System.out.println(allMapIds.size());
 	}
 }
