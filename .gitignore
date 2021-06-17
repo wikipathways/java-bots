@@ -4,4 +4,4 @@
 bin
 build
 org.wikipathways.bots/org.wikipathways.bots-*.jar
-
+**/target/
