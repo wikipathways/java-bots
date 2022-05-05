@@ -89,7 +89,7 @@ public class GenerateGMT {
 				p.readFromXml(f, true);
 				IDMapperStack stack = idmp.getStack(organism);
 				System.out.println("org: " + organism + " | stack: " + stack);
-				Pattern pattern = Pattern.compile(".*_(WP\\d+)_.*");
+				Pattern pattern = Pattern.compile("(WP\\d+)");
 				Matcher matcher = pattern.matcher(f.getName());
 				String wpid = "WP0";
 				while (matcher.find()) {
