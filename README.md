@@ -1,4 +1,4 @@
-# java-bots for GMT from local GPML
+# java-bot for GMT from local GPML
 Check out this branch to work with GMTBot code customized for working with a local folder of GPML.
 Processes a single folder of GPML from a single organism to generate a single GMT file.
 
