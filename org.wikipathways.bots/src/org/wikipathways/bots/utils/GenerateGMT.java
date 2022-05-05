@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.*;
 
 import org.bridgedb.DataSource;
 import org.bridgedb.IDMapperException;
@@ -88,7 +89,14 @@ public class GenerateGMT {
 				p.readFromXml(f, true);
 				IDMapperStack stack = idmp.getStack(organism);
 				System.out.println("org: " + organism + " | stack: " + stack);
-				GeneSet gs = new GeneSet(organism, p, f.getName().replaceFirst("[.][^.]+$", ""), "0");
+				Pattern pattern = Pattern.compile(".*_(WP\\d+)_.*");
+				Matcher matcher = pattern.matcher(f.getName());
+				String wpid = "WP0";
+				while (matcher.find()) {
+					wpid = matcher.group(1);
+					System.out.println(wpid);
+				}
+				GeneSet gs = new GeneSet(organism, p, wpid, "0");
 				
 				System.out.println(p.getDataNodeXrefs().size() + " datanodes.");
 	
