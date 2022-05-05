@@ -65,7 +65,7 @@ public abstract class Bot {
 				throw new BotException("Property cache-path is missing");
 			}
 			File c = new File(cacheStr);
-			if(!c.exists()) c.mkdir();
+			//if(!c.exists()) c.mkdir();
 			cache = new WikiPathwaysCache(c);
 
 			//Login if possible
@@ -84,11 +84,11 @@ public abstract class Bot {
 	protected abstract Result scanPathway(File pathwayFile) throws BotException;
 
 	public Collection<Result> scan() throws BotException {
-		try {
-			getCache().update();
-		} catch(Exception e) {
-			throw new BotException(e);
-		}
+		//try {
+		//	getCache().update();
+		//} catch(Exception e) {
+		//	throw new BotException(e);
+		//}
 
 		List<Result> reports = new ArrayList<Result>();
 
@@ -250,21 +250,23 @@ public abstract class Bot {
 	}
 
 	public static void runAll(Bot bot, File htmlReport, File txtReport) throws BotException, IOException {
-		Logger.log.trace("Running bot " + bot);
-		Collection<Result> results = bot.scan();
+		Logger.log.trace("Run all is not available in this custom version.");
 
-		Logger.log.trace("Generating report");
-		BotReport report = bot.createReport(results);
+		//Logger.log.trace("Running bot " + bot);
+		//Collection<Result> results = bot.scan();
 
-		if(bot.updateTags()) {
-			Logger.log.trace("Applying curation tags");
-			bot.applyCurationTags(results, report);
-		}
+		//Logger.log.trace("Generating report");
+		//BotReport report = bot.createReport(results);
 
-		Logger.log.trace("Writing text report");
-		report.writeTextReport(txtReport);
+		//if(bot.updateTags()) {
+		//	Logger.log.trace("Applying curation tags");
+		//	bot.applyCurationTags(results, report);
+		//}
 
-		Logger.log.trace("Writing HTML report");
-		report.writeHtmlReport(htmlReport);
+		//Logger.log.trace("Writing text report");
+		//report.writeTextReport(txtReport);
+
+		//Logger.log.trace("Writing HTML report");
+		//report.writeHtmlReport(htmlReport);
 	}
 }

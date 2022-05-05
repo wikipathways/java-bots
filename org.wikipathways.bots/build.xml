@@ -3,9 +3,9 @@
 	<property name="src.dir" value="src"/>
 	<property name="debug.mode" value="true"/>
 
-	<property name="version" value="3.2.4"/>
+	<property name="version" value="4.0.0"/>
 	
-	<property name="jar.name" value="org.wikipathways.bots-${version}.jar"/>
+	<property name="jar.name" value="org.wikipathways.bots.LOCAL-${version}.jar"/>
 	<property name="build.dir" value="build"/>
 	
 	<property name="ant.build.javac.source" value="1.6"/>

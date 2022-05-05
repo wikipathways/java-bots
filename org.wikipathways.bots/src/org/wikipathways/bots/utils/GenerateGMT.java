@@ -67,43 +67,45 @@ public class GenerateGMT {
 		
 		List<GeneSet> output = new ArrayList<GeneSet>();
 		
-		Set<String> includeIds = new HashSet<String>();
-		for(String tag : includeTags) {
-			for(WSCurationTag t : client.getCurationTagsByName(tag)) {
-				if(t.getPathway().getSpecies().equals(organism.latinName())) {
-					includeIds.add(t.getPathway().getId());
-				}
-			}
-		}
+		//Set<String> includeIds = new HashSet<String>();
+		//for(String tag : includeTags) {
+		//	for(WSCurationTag t : client.getCurationTagsByName(tag)) {
+		//		if(t.getPathway().getSpecies().equals(organism.latinName())) {
+		//			includeIds.add(t.getPathway().getId());
+		//		}
+		//	}
+		//}
 		
-		System.out.println(includeIds.size());
+		//System.out.println(includeIds.size());
 		
 		int count = 1;
-		int size = includeIds.size();
+		int size = pathwayFiles.size();
 
 		for(File f : pathwayFiles) {
-			WSPathwayInfo i = cache.getPathwayInfo(f);
-			if(includeIds.contains(i.getId())) {
+			//WSPathwayInfo i = cache.getPathwayInfo(f);
+			//if(includeIds.contains(i.getId())) {
 				Pathway p = new Pathway();
 				p.readFromXml(f, true);
-				Organism org = Organism.fromLatinName(i.getSpecies());
-				IDMapperStack stack = idmp.getStack(org);
-				GeneSet gs = new GeneSet(org, p, i.getId(), i.getRevision());
+				IDMapperStack stack = idmp.getStack(organism);
+				System.out.println("org: " + organism + " | stack: " + stack);
+				GeneSet gs = new GeneSet(organism, p, f.getName().replaceFirst("[.][^.]+$", ""), "0");
 				
-				System.out.println(count + " out of  " + size + " pathways.");
-				
+				System.out.println(p.getDataNodeXrefs().size() + " datanodes.");
+	
 				for(Xref x : p.getDataNodeXrefs()) {
+					//System.out.println("Xref: " + x);
 					Set<Xref> res = stack.mapID(x, DataSource.getExistingBySystemCode(syscode));
 					for(Xref xref : res) {
+						//System.out.println("res xref: " + x);
 						gs.getGenes().add(xref.getId());
 					}
 				}
-				
+				System.out.println(gs.getGenes().size() + " genes.");
 				if(gs.getGenes().size() > 0) { 
 					output.add(gs); 
 				}
 				count++;
-			}
+			//}
 		}
 		
 		return output;

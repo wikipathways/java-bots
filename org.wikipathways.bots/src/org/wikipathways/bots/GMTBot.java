@@ -86,7 +86,7 @@ public class GMTBot extends Bot {
 			Properties props = new Properties();
 			props.load(new FileInputStream(new File(args[0])));
 			GMTBot bot =  new GMTBot(props);
-			bot.getCache().update();
+			//bot.getCache().update();
 
 			Calendar cal = Calendar.getInstance();
 	        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -101,20 +101,21 @@ public class GMTBot extends Bot {
 			if(props.getProperty("syscode") != null) {
 				syscode = props.getProperty("syscode");
 			}
-
+			String orgstr = "Homo sapiens";
+			if(props.getProperty("org") != null) {
+				orgstr = props.getProperty("org");
+			}
 			
-			String [] orgs = bot.getClient().listOrganisms();
-			for(String o : orgs) {
-				Organism org = Organism.fromLatinName(o);
-				List<GeneSet> res = gmt.createGMTFile(bot.getCache().getFiles(), syscode, org);
-				if(res.size() > 0) {
-					File f = new File(output, "gmt_wp_" + org.latinName().replace(" ", "_") + ".gmt");
-					FileWriter writer = new FileWriter(f);
-					for(GeneSet gs : res) {
-						writer.write(printGeneSet(gs, date) + "\n");
-					}
-					writer.close();
+			Organism org = Organism.fromLatinName(orgstr);
+			System.out.println("syscode: " + syscode + " | orgstr: " + orgstr + " | org: " + org);
+			List<GeneSet> res = gmt.createGMTFile(bot.getCache().getFiles(), syscode, org);
+			if(res.size() > 0) {
+				File f = new File(output, "gmt_wp_" + org.latinName().replace(" ", "_") + ".gmt");
+				FileWriter writer = new FileWriter(f);
+				for(GeneSet gs : res) {
+					writer.write(printGeneSet(gs, date) + "\n");
 				}
+				writer.close();
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -123,7 +124,7 @@ public class GMTBot extends Bot {
 	}
 	
 	private static String printGeneSet(GeneSet gs, String date) {
-		String output = gs.getPwyName() + "%WikiPathways_" +  date + "%" + gs.getPwyId() + "%" + gs.getOrg().latinName() + "\t" + "http://www.wikipathways.org/instance/" + gs.getPwyId() + "_r" + gs.getPwyRev();
+		String output = gs.getPwyName() + "%WikiPathways_" +  date + "%" + gs.getPwyId() + "%" + gs.getOrg().latinName() + "\t" + "http://www.wikipathways.org/instance/" + gs.getPwyId();
 		for(String g : gs.getGenes()) {
 			output = output + "\t" + g;
 		}

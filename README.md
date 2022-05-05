@@ -1,15 +1,16 @@
-# java-bots
-Java bots for WikiPathways 
-- All bots are running regularly (usually once every day) 
-- Results can be viewed here: http://www.pathvisio.org/data/bots/
-- Example launch command: ```java -Xmx2048m -Dfile.encoding=UTF-8 -cp org.wikipathways.bots-3.2.2.jar org.wikipathways.bots.GMTBot gmt-bot.props gmt-output```
+# java-bots for GMT from local GPML
+Check out this branch to work with GMTBot code customized for working with a local folder of GPML.
+Processes a single folder of GPML from a single organism to generate a single GMT file.
 
+- Example launch command: ```java -Xmx2048m -Dfile.encoding=UTF-8 -cp org.wikipathways.bots.LOCAL-4.0.0.jar org.wikipathways.bots.GMTBot gmt-bot.props gmt-output```
 
-### Available bots:
-- Missing description (adds curation tag to pathways without description)
-- Missing literature references (adds curation tag to pathway without literature references)
-- Unconnected lines (adds curation tag to pathway with unconnected lines)
-- Missing xref (adds curation tag to pathway which contains datanodes without xref annotation)
-- Invalid xrefs (generated list of pathways with xrefs that are not in the identifier mapping databases)
-- GMT file generation (generates a GMT file that can be used for gene set enrichment analysis)
-- RSSM file generation (generates RSSM file - complex XML file - of the complete pathway collection)
+### gmt-bot.props
+webservice-url=http://webservice.wikipathways.org/
+cache-path=gpml-input
+threshold=90
+gdb-config=/Users/alexpico/database/gdb.config
+org=Bos taurus
+
+Notes: 
+ - `cache-path` points to your local folder containing GPML files
+ - `gdb-config` cannot handle complex paths containing spaces or parens  
